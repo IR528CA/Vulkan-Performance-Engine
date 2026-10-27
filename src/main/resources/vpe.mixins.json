@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.vpe.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "vulkan.WindowMixin",
+    "vulkan.RendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

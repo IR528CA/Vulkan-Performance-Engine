@@ -1,0 +1,23 @@
+plugins {
+    id 'fabric-loom' version '1.10-SNAPSHOT'
+    id 'maven-publish'
+}
+version = project.mod_version
+group = project.maven_group
+base { archivesName = project.archives_base_name }
+repositories { maven { url "https://maven.fabricmc.net/" } }
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation files("libs/VulkanMod_1.20.1-0.5.2.jar")
+    // Añadir VulkanMod como dependencia para compilar (compilar contra él)
+    // Para simplificar y evitar repositorios complejos, compilar solo contra Fabric y resolver las clases dinámicamente es más seguro.
+}
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") { expand "version": project.version }
+}
+tasks.withType(JavaCompile).configureEach { it.options.release = 17 }
+java { withSourcesJar() }

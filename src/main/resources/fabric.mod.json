@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "vpe",
+  "version": "${version}",
+  "name": "Vulkan Performance Engine (Native)",
+  "description": "FSR 3 y Frame Generation nativo inyectado en el pipeline Vulkan 1.2 de Minecraft.",
+  "authors": [
+    "IRO528"
+  ],
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.vpe.core.VPEVulkanClient"
+    ]
+  },
+  "mixins": [
+    "vpe.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "vulkanmod": "*"
+  }
+}
