@@ -1,4 +1,4 @@
-﻿name: Build VPE Native & Mod
+name: Build VPE Native & Mod
 
 on:
   push:
@@ -19,19 +19,17 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Install Vulkan SDK
-      uses: humbletim/install-vulkan-sdk@v1.2.0
-      with:
-        version: 1.3.290.0
-        cache: true
+    - name: Install Official Vulkan SDK
+      run: |
+        curl.exe -L -o vulkan-sdk.exe "https://sdk.lunarg.com/sdk/download/1.3.290.0/windows/VulkanSDK-1.3.290.0-Installer.exe"
+        ./vulkan-sdk.exe --accept-licenses --default-answer --confirm-command install
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+    - name: Setup MSVC Compiler
+      uses: ilammy/msvc-dev-cmd@v1
 
     - name: Build C++ Native DLL (fsr3_engine.dll)
       run: |
-        msbuild fsr3_engine/fsr3_engine.vcxproj /p:Configuration=Release /p:Platform=x64 /p:AdditionalIncludeDirectories="$env:JAVA_HOME\include;$env:JAVA_HOME\include\win32;$env:VULKAN_SDK\Include" /p:AdditionalLibraryDirectories="$env:VULKAN_SDK\Lib"
-        Copy-Item -Path "fsr3_engine/x64/Release/fsr3_engine.dll" -Destination "src/main/resources/natives/fsr3_engine.dll" -Force
+        cl.exe /LD /O2 /EHsc /std:c++17 /I"$env:JAVA_HOME\include" /I"$env:JAVA_HOME\include\win32" /I"C:\VulkanSDK\1.3.290.0\Include" /I"fsr3_engine" fsr3_engine/dllmain.cpp fsr3_engine/fsr3_bridge.cpp fsr3_engine/pch.cpp /link /LIBPATH:"C:\VulkanSDK\1.3.290.0\Lib" vulkan-1.lib user32.lib gdi32.lib /OUT:src/main/resources/natives/fsr3_engine.dll
 
     - name: Build Fabric Mod JAR
       run: |
