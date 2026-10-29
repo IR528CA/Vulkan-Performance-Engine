@@ -19,7 +19,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Download Vulkan SDK Headers & Libs
+    - name: Download Vulkan SDK Headers
       run: |
         Invoke-WebRequest -Uri "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v1.3.290.zip" -OutFile "vulkan-headers.zip"
         Expand-Archive -Path "vulkan-headers.zip" -DestinationPath "."
@@ -30,7 +30,11 @@ jobs:
 
     - name: Build C++ Native DLL (fsr3_engine.dll)
       run: |
-        cl.exe /LD /O2 /EHsc /std:c++17 /I"$env:JAVA_HOME\include" /I"$env:JAVA_HOME\include\win32" /I"vulkan-sdk-folder\include" /I"fsr3_engine" fsr3_engine/dllmain.cpp fsr3_engine/fsr3_bridge.cpp fsr3_engine/pch.cpp /link user32.lib gdi32.lib /OUT:src/main/resources/natives/fsr3_engine.dll
+        $exports = Select-String -Path "vulkan-sdk-folder\include\vulkan\*.h" -Pattern "VKAPI_CALL\s+(vk\w+)" | ForEach-Object { $_.Matches.Groups[1].Value } | Select-Object -Unique
+        $defContent = @("LIBRARY vulkan-1.dll", "EXPORTS") + ($exports | ForEach-Object { "    $_" })
+        Set-Content -Path "vulkan-1.def" -Value $defContent -Encoding ASCII
+        lib.exe /def:vulkan-1.def /out:vulkan-1.lib /machine:x64
+        cl.exe /LD /O2 /EHsc /std:c++17 /I"$env:JAVA_HOME\include" /I"$env:JAVA_HOME\include\win32" /I"vulkan-sdk-folder\include" /I"fsr3_engine" fsr3_engine/dllmain.cpp fsr3_engine/fsr3_bridge.cpp fsr3_engine/pch.cpp /link vulkan-1.lib user32.lib gdi32.lib /OUT:src/main/resources/natives/fsr3_engine.dll
 
     - name: Build Fabric Mod JAR
       run: |
